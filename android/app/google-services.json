@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "246266541125",
+    "project_id": "wakafapp",
+    "storage_bucket": "wakafapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:246266541125:android:9e38e0438e3d9cae08df2c",
+        "android_client_info": {
+          "package_name": "com.example.final_project_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "246266541125-1a3djtveihf78endtplq74sc050mtbns.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.final_project_mobile",
+            "certificate_hash": "afce2bf9a8e472217c8c3778b4a76a130c4d9d9b"
+          }
+        },
+        {
+          "client_id": "246266541125-ra91qidpiuvpvro695l5tat186pd21em.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSOOvFL1CMZcXJdmclZDz5Zi0yaOtZUPI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "246266541125-cg1ikddl30lnkrm8am7sgnmufga35jfc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
