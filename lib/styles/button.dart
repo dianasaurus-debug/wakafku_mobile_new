@@ -21,6 +21,5 @@ class CustomButton {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(15.0)),
     ),
-    
   );
 }

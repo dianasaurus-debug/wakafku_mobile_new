@@ -50,6 +50,7 @@ dependencies:
   location: ^4.4.0
   shared_preferences: ^2.0.15
   pin_code_fields: ^7.4.0
+  badges: ^2.0.3
 
 dev_dependencies:
   flutter_test:
@@ -75,6 +76,7 @@ flutter:
 
   assets:
     - lib/assets/images/
+    - lib/assets/images/payment_logo/
 
   fonts:
     - family: Montserrat
