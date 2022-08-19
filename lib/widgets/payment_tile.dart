@@ -19,8 +19,8 @@ class PaymentTile extends StatelessWidget {
     return
       GestureDetector(
           onTap: (){
-            Route route = MaterialPageRoute(builder: (context) => InstruksiPembayaran(payment_method: payment_method));
-            Navigator.push(context, route);
+            // Route route = MaterialPageRoute(builder: (context) => InstruksiPembayaran(payment_method: payment_method));
+            // Navigator.push(context, route);
           },
           child : Container(
             child: ListTile(

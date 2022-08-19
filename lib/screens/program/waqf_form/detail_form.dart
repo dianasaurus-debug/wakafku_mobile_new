@@ -1,7 +1,10 @@
 import 'package:final_project_mobile/models/program.dart';
 import 'package:final_project_mobile/screens/program/detail.dart';
+import 'package:final_project_mobile/screens/program/waqf_form/payment_form.dart';
+import 'package:final_project_mobile/styles/button.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
+import 'package:final_project_mobile/widgets/second_app_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -22,8 +25,12 @@ class DetailFormState extends State<DetailForm> {
 
   @override
   Widget build(BuildContext context){
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(vertical: 10),
+    return
+      Scaffold(
+        backgroundColor: Colors.white,
+        appBar: SecondAppBar(appBar: AppBar(), title : 'Detail'),
+    body: SingleChildScrollView(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -339,6 +346,27 @@ class DetailFormState extends State<DetailForm> {
           )
         ],
       ),
-    );
+    ),
+        floatingActionButton: Container(
+            color: Colors.white,
+            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+            child : Row(
+              children: [
+                Expanded(
+                    child : ElevatedButton(
+                        child: Text("Lanjutkan ke Pembayaran",
+                            style:
+                            CustomFont.whiteBigBold),
+                        style: CustomButton.buttonSubmit,
+                        onPressed: () {
+                          Route route = MaterialPageRoute(builder: (context) => PaymentForm());
+                          Navigator.push(context, route);
+                        })
+                )
+              ],
+            )
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      );
   }
 }

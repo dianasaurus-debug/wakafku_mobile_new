@@ -6,8 +6,9 @@ import 'package:final_project_mobile/models/payment_method.dart';
 import 'package:final_project_mobile/models/program.dart';
 import 'package:final_project_mobile/models/transaction.dart';
 import 'package:flutter/material.dart';
-
+import 'package:intl/intl.dart';
 const API_URL = 'http://192.168.111.26:8000/api';
+final formatCurrency = new NumberFormat.simpleCurrency(locale: 'id_ID');
 List<Category> categories = [
   new Category('Semua', 0, 'all', 'all.png', 'test'),
   new Category('Umum', 1, 'sosial', 'sosial.png', 'test'),
@@ -39,10 +40,9 @@ List<PaymentMethod> payment_methods = [
   new PaymentMethod(name: 'Indomaret', kind: 'Minimarket', logo: 'lib/assets/images/payment_logo/indomaret.png'),
 ];
 List<PaymentInstruction> payment_instructions = [
-  new PaymentInstruction(title: 'ATM Mandiri', desc: 'LANGKAH 1: TEMUKAN ATM TERDEKAT'),
-  new PaymentInstruction(title: 'M-Banking (Old Livin by Mandiri)', desc: 'LANGKAH 1: MASUK KE AKUN ANDA'),
-  new PaymentInstruction(title: 'M-Banking (New Livin by Mandiri)', desc: 'LANGKAH 1: MASUK KE AKUN ANDA'),
-
-
+  new PaymentInstruction(title: 'ATM Mandiri',
+      desc: '1. Masukkan kartu ATM dan Pin ATM.\n2. Pilih menu Bayar/Beli.\n3. Pilih opsi Lainnya > Multipayment.\n4. Masukkan kode biller perusahaan (biasanya sudah tercantum di instruksi pembayaran).\n5. Masukkan nomor Virtual account > Benar.\n6. Masukkan angka yang diminta untuk memilih tagihan > Ya.\n7. Layar akan menampilkan konfirmasi. Jika sesuai, pilih Ya.\n8. Selesai.'),
+  new PaymentInstruction(title: 'M-Banking',
+      desc: '1. Buka aplikasi M-Banking.\n2. Pilih menu Bayar/Beli.\n3. Pilih opsi Lainnya > Multipayment.\n4. Masukkan kode biller perusahaan (biasanya sudah tercantum di instruksi pembayaran).\n5. Masukkan nomor Virtual account > Benar.\n6. Masukkan angka yang diminta untuk memilih tagihan > Ya.\n7. Layar akan menampilkan konfirmasi. Jika sesuai, pilih Ya.\n8. Selesai.'),
 ];
 String textSample='Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book ';

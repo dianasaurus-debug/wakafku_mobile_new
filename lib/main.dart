@@ -1,4 +1,5 @@
 
+import 'package:final_project_mobile/screens/cobacoba.dart';
 import 'package:final_project_mobile/screens/welcome/splash_screen.dart';
 import 'package:final_project_mobile/utils/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
               ),
             ),
           ),
-          home: SplashScreenPage(),
+          home: Coba(),
           title: 'Kitsune',
           getPages: Routes().pages,
           debugShowCheckedModeBanner: false,
