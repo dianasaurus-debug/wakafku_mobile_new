@@ -63,19 +63,19 @@ class _CobaState extends State<Coba> {
                   textFieldConfiguration: TextFieldConfiguration(
                     autofocus: true,
                     decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(), //modify outline field
                         hintText: 'What is on your mind?'),
                   ),
                   suggestionsCallback: (pattern) async {
-                    return await VendorNetwork().getCariItem(pattern);
+                    return await VendorNetwork().getCariItem(pattern); //ambil data dari api
                   },
-                  itemBuilder: (context, suggestion) {
+                  itemBuilder: (context, suggestion) { //nampilin list suggestion
                     var suggestion_parse = (suggestion as Map);
                     return ListTile(
                       title: Text(suggestion_parse['itemcode']),
                     );
                   },
-                  onSuggestionSelected: (suggestion) {
+                  onSuggestionSelected: (suggestion) { //yg dilakukan ketika orang klik suggested item yg dipilih
                     var detail_suggestion_parse = (suggestion as Map);
                     print(detail_suggestion_parse);
                   },
