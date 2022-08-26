@@ -23,11 +23,101 @@ class Coba extends StatefulWidget {
 }
 
 class _CobaState extends State<Coba> {
-
+  var i = 1;
   @override
   void initState() {
     super.initState();
+    arrofRows.add(
+      TableRow(children: [
+        Column(children: [
+          Text('${i}',
+              style: TextStyle(fontSize: 12, color: Colors.black))
+        ]),
+        Column(children: [
+          // input barcode
+          TypeAheadFormField(
+            textFieldConfiguration: TextFieldConfiguration(
+              controller: textControllers[0]['barcode'],
+              autofocus: true,
+              decoration: InputDecoration(
+                  border: OutlineInputBorder(), //modify outline field
+                  hintText: 'Type barcode'),
+            ),
+            suggestionsCallback: (pattern) async {
+              return await VendorNetwork().getCariItem(pattern);
+            }, //ambil data dari api
+            itemBuilder: (context, suggestion) {
+              //nampilin list suggestion
+              var suggestion_parse = (suggestion as Map);
+              return ListTile(
+                title: Text(suggestion_parse['make']['make']),
+                // title: Text('${suggestion_parse['barcode']} ${suggestion_parse['barcodelbl']}'),
+                subtitle: Text('\$${suggestion['name']}'),
+              );
+            },
+            onSuggestionSelected: (suggestion) {
+              //yg dilakukan ketika orang klik suggested item yg dipilih
+              var detail_suggestion_parse = (suggestion as Map);
+              textControllers[0]['barcode'].text = detail_suggestion_parse['make']['make'];
+              textControllers[0]['product'].text = detail_suggestion_parse['name'];
+              textControllers[0]['price'].text = detail_suggestion_parse['default_price'];
+              textControllers[0]['qty'].text = detail_suggestion_parse['id'].toString();
+              textControllers[0]['disc'].text = detail_suggestion_parse['discount'].toString();
+              textControllers[0]['total'].text = (int.parse(textControllers[0]['qty'].text)*double.parse(detail_suggestion_parse['default_price'])).toString();
+            },
+          ),
+        ]),
+        Column(children: [
+          TextField(readOnly : true, controller: textControllers[0]['product'], style: TextStyle(fontSize: 12, color: Colors.black))
+
+        ]),
+        Column(children: [
+          TextField(readOnly : true, controller: textControllers[0]['price'], style: TextStyle(fontSize: 12, color: Colors.black))
+
+        ]),
+        Column(children: [
+          TextField(
+            controller: textControllers[0]['qty'],
+            autofocus: false,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+              contentPadding:
+              EdgeInsets.fromLTRB(12, 10.0, 12, 10.0),
+              filled: true,
+              fillColor: Color(0xffb2ff59),
+              border: OutlineInputBorder(
+                  borderSide:
+                  BorderSide(color: Colors.white, width: 0.0)),
+            ),
+          )
+        ]),
+        Column(children: [
+          TextField(readOnly : true, controller: textControllers[0]['disc'], style: TextStyle(fontSize: 12, color: Colors.black))
+
+        ]),
+        Column(children: [
+          TextField(readOnly : true, controller: textControllers[0]['total'], style: TextStyle(fontSize: 12, color: Colors.black))
+
+        ]),
+        Column(children: const [
+          Text('',
+              style: TextStyle(fontSize: 12, color: Colors.black))
+        ]),
+      ]),
+    );
   }
+  List<dynamic> textControllers = [
+    {
+      'barcode' :  TextEditingController(),
+      'product' :  TextEditingController(),
+      'price' :  TextEditingController(),
+      'qty':  TextEditingController(),
+      'disc' :  TextEditingController(),
+      'total' :  TextEditingController()
+    }
+  ];
+  List<TableRow> arrofRows = [];
+
 
 
   @override
@@ -54,33 +144,76 @@ class _CobaState extends State<Coba> {
           ],
           elevation: 0),
       body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+          child: Table(
+              border: TableBorder.all(
+                  color: Colors.black, style: BorderStyle.solid, width: 2),
               children: [
-                TypeAheadField(
-                  textFieldConfiguration: TextFieldConfiguration(
-                    autofocus: true,
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(), //modify outline field
-                        hintText: 'What is on your mind?'),
-                  ),
-                  suggestionsCallback: (pattern) async {
-                    return await VendorNetwork().getCariItem(pattern); //ambil data dari api
-                  },
-                  itemBuilder: (context, suggestion) { //nampilin list suggestion
-                    var suggestion_parse = (suggestion as Map);
-                    return ListTile(
-                      title: Text(suggestion_parse['itemcode']),
-                    );
-                  },
-                  onSuggestionSelected: (suggestion) { //yg dilakukan ketika orang klik suggested item yg dipilih
-                    var detail_suggestion_parse = (suggestion as Map);
-                    print(detail_suggestion_parse);
-                  },
-                ),
-              ])),
+                TableRow(children: [
+                  Column(children: const [
+                    Text('No',
+                        style: TextStyle(fontSize: 12, color: Colors.black))
+                  ]),
+                  Column(children: const [
+                    Text('Barcode',
+                        style: TextStyle(fontSize: 12, color: Colors.black))
+                  ]),
+                  Column(children: const [
+                    Text('Product',
+                        style: TextStyle(fontSize: 12, color: Colors.black))
+                  ]),
+                  Column(children: const [
+                    Text('Price',
+                        style: TextStyle(fontSize: 12, color: Colors.black))
+                  ]),
+                  Column(children: const [
+                    Text('Qty',
+                        style: TextStyle(fontSize: 12, color: Colors.black))
+                  ]),
+                  Column(children: const [
+                    Text('Disc',
+                        style: TextStyle(fontSize: 12, color: Colors.black))
+                  ]),
+                  Column(children: const [
+                    Text('Total',
+                        style: TextStyle(fontSize: 12, color: Colors.black))
+                  ]),
+                  Column(children: const [
+                    Text('',
+                        style: TextStyle(fontSize: 12, color: Colors.black))
+                  ]),
+                ]),
+                for ( var i=0;i<arrofRows.length;i++ )
+                  arrofRows[i]
+
+              ])
+          // child: Column(
+          //     mainAxisAlignment: MainAxisAlignment.start,
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: [
+          //       TypeAheadField(
+          //         textFieldConfiguration: TextFieldConfiguration(
+          //           autofocus: true,
+          //           decoration: InputDecoration(
+          //               border: OutlineInputBorder(), //modify outline field
+          //               hintText: 'What is on your mind?'),
+          //         ),
+          //         suggestionsCallback: (pattern) async {
+          //           return await VendorNetwork().getCariItem(pattern); //ambil data dari api
+          //         },
+          //         itemBuilder: (context, suggestion) { //nampilin list suggestion
+          //           var suggestion_parse = (suggestion as Map);
+          //           return ListTile(
+          //             title: Text(suggestion_parse['itemcode']),
+          //           );
+          //         },
+          //         onSuggestionSelected: (suggestion) { //yg dilakukan ketika orang klik suggested item yg dipilih
+          //           var detail_suggestion_parse = (suggestion as Map);
+          //           print(detail_suggestion_parse);
+          //         },
+          //       ),
+          //     ])
+          ),
     );
   }
 }
