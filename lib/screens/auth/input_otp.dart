@@ -1,7 +1,13 @@
 import 'dart:async';
 
+import 'package:final_project_mobile/screens/auth/login.dart';
+import 'package:final_project_mobile/screens/home/beranda.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
+import 'package:final_project_mobile/utils/network.dart';
+import 'package:final_project_mobile/view_models/auth_vm.dart';
+import 'package:final_project_mobile/view_models/auth_vm.dart';
+import 'package:final_project_mobile/view_models/auth_vm.dart';
 import 'package:final_project_mobile/widgets/auth_app_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -13,6 +19,8 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/src/provider.dart';
 
+import '../../mixins/dialog_mixin.dart';
+
 // import 'package:intl/intl.dart';
 
 class InputOtpEmail extends StatefulWidget {
@@ -20,7 +28,7 @@ class InputOtpEmail extends StatefulWidget {
   State<StatefulWidget> createState() => new InputOtpEmailState();
 }
 
-class InputOtpEmailState extends State<InputOtpEmail> {
+class InputOtpEmailState extends State<InputOtpEmail> with DialogMixin {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   String otp_code = '';
   // bool wait = false;
@@ -28,7 +36,15 @@ class InputOtpEmailState extends State<InputOtpEmail> {
   void initState() {
     super.initState();
     otpController = TextEditingController();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      context
+          .read<AuthViewModel>()
+          .setNetworkService(context.read<BaseNetwork>());
+      final AuthViewModel svm = context.read<AuthViewModel>();
+    });
   }
+  late TextEditingController otpController;
+
 
   @override
   void dispose() {
@@ -36,13 +52,24 @@ class InputOtpEmailState extends State<InputOtpEmail> {
     otpController.dispose();
   }
 
-  late TextEditingController otpController;
 
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AuthAppBar(appBar: AppBar(), title : 'Masukkan OTP'),
-      body: SingleChildScrollView(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_rounded, color: CustomColor.themedarker, size: 25),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        elevation: 0,
+        title:
+        Text('Masukkan OTP', style: CustomFont.orangeBigBold),
+      ),
+      body:
+    Consumer<AuthViewModel>(
+    builder: (_, AuthViewModel vm, __) =>
+    SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Padding(
             padding: EdgeInsets.fromLTRB(20, 10, 20, 20),
@@ -50,7 +77,7 @@ class InputOtpEmailState extends State<InputOtpEmail> {
               Text('Kode verifikasi (OTP) telah dikirim melalui Email ke'),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 10),
-                child: Text('nadatalita76@gmail.com', style: CustomFont.blackBigBold),
+                child: Text(vm.currentUser!.email ?? 'Loading...', style: CustomFont.blackBigBold),
               ),
               Row(
                 children: [
@@ -77,9 +104,7 @@ class InputOtpEmailState extends State<InputOtpEmail> {
                           activeColor: CustomColor.theme,
                         ),
                         enableActiveFill: true,
-                        onChanged: (String? val){
-                          null;
-                        },
+                        onChanged: vm.onOtpChange,
                         controller: otpController,
                       ))
                 ],
@@ -89,7 +114,7 @@ class InputOtpEmailState extends State<InputOtpEmail> {
                 child: SizedBox(
                   width: size.width * 0.7,
                   child: ElevatedButton(
-                    child: Text("Lanjut".toUpperCase(),
+                    child: Text(vm.isLoading? 'Memuat...' : 'Verifikasi',
                         style: CustomFont.textInfoWhiteLight),
                     style: ButtonStyle(
                         foregroundColor: MaterialStateProperty.all<Color>(
@@ -103,11 +128,17 @@ class InputOtpEmailState extends State<InputOtpEmail> {
                                 side:
                                 BorderSide(color: CustomColor.theme)))),
                     onPressed: () {
-                      // if (vm.isLoading != true) {
-                      //   vm.verificationOtp();
-                      // } else {
-                      //   null;
-                      // }
+                      if (vm.isLoading != true) {
+                        vm.verificationOtp().then((value) {
+                          if(vm.isSuccess==true){
+                            Get.offAll(LoginPage());
+                          } else {
+                            showErrorSnackbar('Kode OTP Salah!');
+                          }
+                        });
+                      } else {
+                        null;
+                      }
                     },
                   ),
                 ),
@@ -126,6 +157,7 @@ class InputOtpEmailState extends State<InputOtpEmail> {
                         style: CustomFont.orangeMedBold,
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
+
                             showDialog(
                                 context: context,
                                 builder: (context) {
@@ -139,13 +171,13 @@ class InputOtpEmailState extends State<InputOtpEmail> {
                                         text: TextSpan(children: [
                                           TextSpan(
                                               text:
-                                              'Kamu akan menerima kode verivikasi (OTP) E-Mail yang dikirimkan ke ',
+                                              'Anda akan menerima kode verivikasi (OTP) E-Mail yang dikirimkan ke ',
                                               style: TextStyle(
                                                   color: CustomColor.text,
                                                   fontSize: 16,
                                                   height: 1.2)),
                                           TextSpan(
-                                              text: 'nadatalita76@gmail.com',
+                                              text: vm.currentUser!.email ?? 'Loading...',
                                               style: TextStyle(
                                                   color: CustomColor.text,
                                                   fontSize: 16,
@@ -153,41 +185,23 @@ class InputOtpEmailState extends State<InputOtpEmail> {
                                         ]),
                                       ),
                                       actions: [
-                                        Row(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment
-                                              .spaceBetween,
-                                          children: [
-                                            MaterialButton(
-                                              minWidth: size.width / 4,
-                                              shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                  BorderRadius.circular(
-                                                      10.0)),
-                                              color: CustomColor.theme,
-                                              onPressed: () {},
-                                              child: Text("Cara Lain"),
-                                            ),
-                                            MaterialButton(
-                                              minWidth: size.width / 4,
-                                              shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                  BorderRadius.circular(
-                                                      10.0)),
-                                              color: CustomColor.theme,
-                                              onPressed: () {
-                                                setState(() {
-                                                  Navigator.pop(
-                                                      context, true);
-                                                  otpController.clear();
-                                                  // vm.sendOtp();
-                                                });
-                                              },
-                                              child: Text("Lanjut"),
-                                            ),
-                                          ],
+                                        MaterialButton(
+                                          minWidth: size.width / 4,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                  10.0)),
+                                          color: CustomColor.theme,
+                                          onPressed: () {
+                                            setState(() {
+                                              Navigator.pop(
+                                                  context, true);
+                                              otpController.clear();
+                                              // vm.sendOtp();
+                                            });
+                                          },
+                                          child: Text(vm.isLoading? 'Memuat...' : 'Verifikasi'),
                                         ),
-                                        Padding(padding: EdgeInsets.all(5))
                                       ]);
                                 });
                           }),
@@ -195,7 +209,7 @@ class InputOtpEmailState extends State<InputOtpEmail> {
                 ),
               ),
             ]),
-          ))
+          )))
     );
   }
 }

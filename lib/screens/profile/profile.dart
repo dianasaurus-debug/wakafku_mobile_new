@@ -7,6 +7,10 @@ import 'package:final_project_mobile/widgets/app_bar.dart';
 import 'package:final_project_mobile/widgets/bottom_navbar.dart';
 import 'package:final_project_mobile/widgets/second_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../utils/network.dart';
+import '../../view_models/auth_vm.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -19,10 +23,20 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
   }
+  void viewModel() {
+
+    context
+        .read<AuthViewModel>().setNetworkService(context.read<BaseNetwork>());
+    context.read<AuthViewModel>().fetchUser();
+
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return
+      Consumer<AuthViewModel>(
+          builder: (_, AuthViewModel user_vm, __) =>
+      Scaffold(
       backgroundColor: Colors.white,
       appBar: SecondAppBar(appBar: AppBar(), title : 'Profil'),
       body: SingleChildScrollView(
@@ -43,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             SizedBox(height: 5),
-            Text('Diana Fitri', style: CustomFont.blackMedBold),
+            Text('${user_vm.currentUser!.name}', style: CustomFont.blackMedBold),
             SizedBox(height: 20),
             Row(
               children: [
@@ -58,7 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       child : Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text('2', style: CustomFont.whiteMedBold),
+                          Text('-', style: CustomFont.whiteMedBold),
                           SizedBox(height: 8),
                           Text('Wakaf', style: CustomFont.whiteMedBold,)
                         ],
@@ -77,7 +91,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         child : Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text('Rp 200k', style: CustomFont.whiteMedBold),
+                            Text('-', style: CustomFont.whiteMedBold),
                             SizedBox(height: 8),
                             Text('Wakaf', style: CustomFont.whiteMedBold,)
                           ],
@@ -96,7 +110,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         child : Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text('2', style: CustomFont.whiteMedBold),
+                            Text('-', style: CustomFont.whiteMedBold),
                             SizedBox(height: 8),
                             Text('Wakaf', style: CustomFont.whiteMedBold,)
                           ],
@@ -195,7 +209,7 @@ class _ProfilePageState extends State<ProfilePage> {
               padding: EdgeInsets.symmetric(horizontal: 20, vertical : 20),
               child: GestureDetector(
                 onTap: (){
-
+                  user_vm.logout();
                 },
                 child: Row(
                   children: [
@@ -215,6 +229,6 @@ class _ProfilePageState extends State<ProfilePage> {
         )
       ),
       bottomNavigationBar: BottomNavbar(current: 3),
-    );
+    ));
   }
 }

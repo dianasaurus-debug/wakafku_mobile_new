@@ -11,6 +11,7 @@ class PaymentMethod {
     this.id=0,
     this.name="",
     this.logo="",
+    this.label="",
     this.kind = '',
   });
 

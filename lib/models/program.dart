@@ -6,6 +6,7 @@ class Program {
   late String longitude = '';
   late String cover = '';
   late String terkumpul = '';
+  late double distance = 0;
   late int id;
 
   Program({this.id = 0,
@@ -15,6 +16,7 @@ class Program {
     this.latitude = '',
     this.longitude = '',
     this.cover = '',
+    this.distance = 0,
     this.terkumpul = ''});
 
   Program.fromJson(Map<String, dynamic> json)
@@ -24,6 +26,7 @@ class Program {
         address_detail = json['address_detail'],
         latitude = json['latitude'],
         longitude = json['longitude'],
+        distance = json['distance'] != null? json['distance'] : 0,
         cover = json['cover'],
         terkumpul = json['terkumpul'];
 

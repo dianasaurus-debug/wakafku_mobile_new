@@ -2,6 +2,7 @@ import 'package:final_project_mobile/models/payment_method.dart';
 import 'package:final_project_mobile/models/program.dart';
 import 'package:final_project_mobile/screens/program/detail.dart';
 import 'package:final_project_mobile/screens/program/waqf_form/confirmation_form.dart';
+import 'package:final_project_mobile/screens/program/waqf_form/detail_form.dart';
 import 'package:final_project_mobile/styles/button.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
@@ -11,10 +12,18 @@ import 'package:final_project_mobile/widgets/payment_tile.dart';
 import 'package:final_project_mobile/widgets/second_app_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/route_manager.dart';
 import 'package:intl/intl.dart';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../utils/mixins/dialog_mixin.dart';
+import '../../../utils/network.dart';
+import '../../../view_models/auth_vm.dart';
+import '../../../view_models/program_vm.dart';
 
 
 class PaymentForm extends StatefulWidget {
@@ -22,13 +31,40 @@ class PaymentForm extends StatefulWidget {
   PaymentFormState createState() => new PaymentFormState();
 }
 
-class PaymentFormState extends State<PaymentForm> {
+class PaymentFormState extends State<PaymentForm> with DialogMixin {
 
   bool isAbadi = false;
   bool isMyself = true;
   int selected = -1;
+  void viewModel() {
+    context
+        .read<ProgramViewModel>().setNetworkService(context.read<BaseNetwork>());
+  }
 
-  Widget _paymentTile(int index, PaymentMethod items) {
+  @override
+  void initState() {
+    viewModel();
+    super.initState();
+
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      context
+          .read<ProgramViewModel>()
+          .setNetworkService(context.read<BaseNetwork>());
+      context
+          .read<AuthViewModel>()
+          .setNetworkService(context.read<BaseNetwork>());
+      final ProgramViewModel svm = context.read<ProgramViewModel>();
+
+      context.read<AuthViewModel>().fetchUser();
+      context.read<ProgramViewModel>().fetchAllBanks();
+
+      // messaging.getToken().then((value) {
+      //   svm.setFCMToken(value);
+      // });
+
+    });
+  }
+  Widget _paymentTile(int index, PaymentMethod items, ProgramViewModel program_vm) {
     return Card(
       elevation: 5,
       margin: EdgeInsets.only(bottom: 10),
@@ -43,18 +79,22 @@ class PaymentFormState extends State<PaymentForm> {
             index == selected ? Icons.check_box : Icons.check_box_outline_blank,
           ),
           onExpansionChanged: (expanded) {
-            if (expanded)
+            if (expanded){
               setState(() {
                 Duration(seconds: 20000);
                 selected = index;
               });
+              print(payment_methods[index].label);
+              program_vm.onPaymentMethodChange(items.label);
+            }
+
             else
               setState(() {
                 selected = -1;
               });
           },
           title: Row(children: [
-            Image.asset(items.logo, width : 50),
+            Image.network(BANK_LOGO_IMG_PATH+items.logo, width : 50),
             SizedBox(width : 10),
             Expanded(
                 child : Text(items.name, style: CustomFont.blackBigBold)
@@ -77,6 +117,8 @@ class PaymentFormState extends State<PaymentForm> {
   @override
   Widget build(BuildContext context){
     return
+      Consumer<ProgramViewModel>(
+          builder: (_, ProgramViewModel program_vm, __) =>
       Scaffold(
           backgroundColor: CustomColor.whitebg,
           appBar: SecondAppBar(appBar: AppBar(), title : 'Pembayaran'),
@@ -100,9 +142,9 @@ class PaymentFormState extends State<PaymentForm> {
                       physics: NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
                       scrollDirection: Axis.vertical,
-                      itemCount: payment_methods.length,
+                      itemCount: program_vm.all_bank.length,
                       itemBuilder: (BuildContext context, int index) {
-                        return _paymentTile(index, payment_methods[index]);
+                        return _paymentTile(index, program_vm.all_bank[index], program_vm);
                       },
                     ),
                 ]
@@ -115,20 +157,38 @@ class PaymentFormState extends State<PaymentForm> {
             children: [
               Expanded(
                 child : ElevatedButton(
-                    child: Text("Bayar",
+                    child: Text(program_vm.isLoading == true ? 'Memuat...' : "Bayar",
                         style:
                         CustomFont.whiteBigBold),
                     style: CustomButton.buttonSubmit,
                     onPressed: () {
-                      Route route = MaterialPageRoute(builder: (context) => ConfirmationForm());
-                      Navigator.push(context, route);
+                      if(program_vm.payment_method!=null){
+                        program_vm.createTransaction().then((value) {
+                          if(program_vm.isSuccess==true){
+                            showSuccessSnackbar('Membuat data pembayaran berhasil!');
+                            Get.offAll(ConfirmationForm());
+                          } else {
+                            showSingleActionDialog(
+                              'Oops!',
+                              'Pembayaran gagal!',
+                              'Coba lagi',
+                                  () => Get.offAll(DetailForm()),
+                            );
+                          }
+                        });
+                        // Route route = MaterialPageRoute(builder: (context) => ConfirmationForm());
+                        // Navigator.push(context, route);
+                      } else {
+                        showSingleWarningDialog('Mohon pilih metode pembayaran dulu');
+                      }
+
                     })
               )
             ],
           )
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      );
+      ));
 
   }
 }

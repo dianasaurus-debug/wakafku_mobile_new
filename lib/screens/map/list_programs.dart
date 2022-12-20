@@ -5,6 +5,8 @@ import 'package:final_project_mobile/screens/map/recommendation.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
 import 'package:final_project_mobile/utils/constants.dart';
+import 'package:final_project_mobile/utils/network.dart';
+import 'package:final_project_mobile/view_models/program_vm.dart';
 import 'package:final_project_mobile/widgets/bottom_navbar.dart';
 import 'package:final_project_mobile/widgets/program_tile_horizontal.dart';
 import 'package:final_project_mobile/widgets/second_app_bar.dart';
@@ -14,6 +16,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:location/location.dart' as LocationManager;
+import 'package:provider/provider.dart';
 
 class ListProgramPage extends StatefulWidget {
   @override
@@ -22,10 +25,15 @@ class ListProgramPage extends StatefulWidget {
 
 class _ListProgramPageState extends State<ListProgramPage> {
 
+  void viewModel() {
+    context
+        .read<ProgramViewModel>().setNetworkService(context.read<BaseNetwork>());
+    context.read<ProgramViewModel>().fetchAllPrograms();
 
+  }
   @override
   void initState() {
-
+    viewModel();
     super.initState();
   }
 
@@ -81,8 +89,8 @@ class _ListProgramPageState extends State<ListProgramPage> {
             )
         ),
       ),
-      body:
-      Column(
+      body: Consumer<ProgramViewModel>(
+    builder: (_, ProgramViewModel program_vm, __) => Column(
         children: [
           Row(
             children: [
@@ -133,14 +141,14 @@ class _ListProgramPageState extends State<ListProgramPage> {
             child: ListView.builder(
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
-              itemCount: programs.length,
+              itemCount: program_vm.program_list.length,
               itemBuilder: (BuildContext context, int index) {
-                return ProgramTileHorizontal(programs[index]);
+                return ProgramTileHorizontal(program_vm.program_list[index]);
               },
             ),
           )
         ],
-      ),
+      )),
     );
   }
 }

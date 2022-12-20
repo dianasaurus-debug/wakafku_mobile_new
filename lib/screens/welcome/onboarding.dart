@@ -37,6 +37,7 @@ class _OnBoardingState extends State<OnBoarding> {
           Expanded(
             child: PageView.builder(
                 scrollDirection: Axis.horizontal,
+                controller: _controller,
                 onPageChanged: (value){
                   setState(() {
                     currentIndex = value;
@@ -67,8 +68,9 @@ class _OnBoardingState extends State<OnBoarding> {
             onPressed: (){
               if(currentIndex == slides.length - 1){
                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> HomePage()));
+              } else {
+                _controller.nextPage(duration: Duration(milliseconds: 100), curve: Curves.bounceIn);
               }
-              _controller.nextPage(duration: Duration(milliseconds: 100), curve: Curves.bounceIn);
             },
           ),
         ],

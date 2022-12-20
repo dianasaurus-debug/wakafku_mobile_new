@@ -1,7 +1,9 @@
 import 'package:final_project_mobile/models/program.dart';
+import 'package:final_project_mobile/screens/program/detail.dart';
 import 'package:final_project_mobile/styles/button.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
+import 'package:final_project_mobile/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -51,18 +53,18 @@ class ProgramTileHorizontal extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Image.network(program.cover, fit: BoxFit.cover),
+                child: Image.network(IMG_PATH+program.cover, fit: BoxFit.cover),
               ),
               Expanded(
                   child: Column(
                     children: [
-                      Text('Program Wakaf Sejahtera', style: CustomFont.blackMedBold),
+                      Text(program.title, style: CustomFont.blackMedBold),
                       Row(children: [
                         Icon(FontAwesomeIcons.locationPin,
                             color: CustomColor.theme, size: 20),
                         SizedBox(width: 5),
                         Text(
-                          'Jln Sudirohusodo, Malang',
+                          program.address_detail,
                           style: CustomFont.blackSmallight,
                         ),
                       ]),
@@ -71,7 +73,7 @@ class ProgramTileHorizontal extends StatelessWidget {
                             color: CustomColor.theme, size: 20),
                         SizedBox(width: 5),
                         Text(
-                          '6 Km',
+                          '${program.distance.toStringAsFixed(1)} Km',
                           style: CustomFont.blackSmallight,
                         ),
                       ]),
@@ -98,7 +100,10 @@ class ProgramTileHorizontal extends StatelessWidget {
               ElevatedButton(
                 style: CustomButton.buttonSubmit,
                 child: const Text('Detail'),
-                onPressed: () {},
+                onPressed: () {
+                  Route route = MaterialPageRoute(builder: (context) => ProgramDetail(program : program));
+                  Navigator.push(context, route);
+                },
               ),
             ],
           )

@@ -1,3 +1,4 @@
+import 'package:final_project_mobile/screens/auth/login.dart';
 import 'package:final_project_mobile/screens/welcome/splash_screen.dart';
 import 'package:get/route_manager.dart';
 
@@ -9,6 +10,10 @@ class Routes {
     GetPage(
       name: '/',
       page: () => SplashScreenPage(),
+    ),
+    GetPage(
+      name: '/login',
+      page: () => LoginPage(),
     )
 
   ];

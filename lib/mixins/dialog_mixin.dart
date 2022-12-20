@@ -2,6 +2,7 @@ import 'package:final_project_mobile/styles/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../../styles/font.dart';
 
@@ -151,5 +152,54 @@ mixin DialogMixin {
 
   void showGetBottomSheet(Widget child) {
     Get.bottomSheet(child);
+  }
+  showFailedDialog(
+      {required BuildContext context,
+        required String title,
+        Color? color}) {
+    Alert(
+      style: AlertStyle(
+          animationType: AnimationType.grow,
+          isCloseButton: false,
+          alertElevation: 0,
+          overlayColor: Colors.black.withOpacity(0.5),
+          buttonAreaPadding: EdgeInsets.all(10)),
+      context: context,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Icon(Icons.info_outline, color: color ?? Colors.red, size: 80),
+          SizedBox(height: 8),
+          Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 4),
+          const Text(
+            'Silahkan coba lagi',
+            style: TextStyle(color : Colors.black),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 16),
+          TextButton(
+            style: TextButton.styleFrom(
+              primary: Colors.white,
+              onSurface: Colors.white,
+              backgroundColor: color ?? Colors.red,
+              textStyle: TextStyle(color : Colors.white),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              minimumSize: Size.fromHeight(40),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              ),
+            ),
+            child: const Text('Coba Lagi', style: TextStyle(color : Colors.white)),
+            onPressed: () => Get.back(),
+          ),
+        ],
+      ),
+      buttons: [],
+    ).show();
   }
 }

@@ -1,18 +1,28 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:final_project_mobile/screens/auth/login.dart';
 import 'package:final_project_mobile/screens/program/categories.dart';
 import 'package:final_project_mobile/styles/button.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
 import 'package:final_project_mobile/utils/constants.dart';
+import 'package:final_project_mobile/utils/network.dart';
+import 'package:final_project_mobile/view_models/auth_vm.dart';
+import 'package:final_project_mobile/view_models/program_vm.dart';
 import 'package:final_project_mobile/widgets/app_bar.dart';
 import 'package:final_project_mobile/widgets/bottom_navbar.dart';
 import 'package:final_project_mobile/widgets/nav_drawer.dart';
 import 'package:final_project_mobile/widgets/program_tile.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:overlay_support/overlay_support.dart';
+import 'package:provider/provider.dart';
+import 'package:location/location.dart';
+import 'package:location/location.dart' as LocationManager;
 
 class HomePage extends StatefulWidget {
   @override
@@ -20,18 +30,111 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late LatLng myPosition;
+  late bool _serviceEnabled;
+  late PermissionStatus _permissionGranted;
+  bool isListShown = true;
+  LocationManager.Location location = new LocationManager.Location();
+  double _lat = -7.317463;
+  double _lng = 111.761466;
+  late CameraPosition _currentPosition = CameraPosition(
+    target: LatLng(_lat, _lng),
+    zoom: 16,
+  );
+  Completer<GoogleMapController> _controller = Completer();
+
+  void viewModel() {
+    context
+        .read<ProgramViewModel>().setNetworkService(context.read<BaseNetwork>());
+    context
+        .read<AuthViewModel>().setNetworkService(context.read<BaseNetwork>());
+    context.read<AuthViewModel>().fetchUser();
+
+  }
+  _locateMe() async {
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == LocationManager.PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != LocationManager.PermissionStatus.granted) {
+        return;
+      }
+    }
+    await location.getLocation().then((res) async {
+      setState(() {
+        _lat = res.latitude!;
+        _lng = res.longitude!;
+      });
+    });
+    final ProgramViewModel svm = context.read<ProgramViewModel>();
+    svm.setCoordinates(_lat.toString(), _lng.toString());
+    context.read<ProgramViewModel>().fetchAllPrograms();
+  }
 
   @override
   void initState() {
+    // FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+    //   showSimpleNotification(
+    //     Text(event.notification!.title!, style: TextStyle(fontSize: 16, color: CustomColor.theme)),
+    //     subtitle: Text(event.notification!.body!, style: TextStyle(fontSize: 13, color: Colors.black)),
+    //     background: Colors.white,
+    //     duration: Duration(seconds: 20),
+    //     elevation: 2,
+    //   );
+    // });
+    viewModel();
+    _locateMe();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return  Consumer<AuthViewModel>(
+      builder: (_, AuthViewModel user_vm, __) => Consumer<ProgramViewModel>(
+          builder: (_, ProgramViewModel program_vm, __) => Scaffold(
         backgroundColor: Colors.white,
         drawer: NavDrawer(),
-        appBar: BaseAppBar(appBar: AppBar()),
+        appBar: AppBar(
+            backgroundColor: Colors.white,
+            leading: Builder(
+              builder: (context) => IconButton(
+                icon: Icon(Icons.menu_rounded, color: CustomColor.theme),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
+            ),
+            elevation: 0,
+            actions:  [
+              if(user_vm.isLoggedIn == false)...[
+                IconButton(
+                    icon: Icon(CupertinoIcons.arrow_right_square_fill,
+                        color: CustomColor.theme),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage()),
+                      );
+                    }),
+              ]
+
+              // IconButton(
+              //   icon: Icon(CupertinoIcons.bell_fill,
+              //       color: CustomColor.theme),
+              //   onPressed: () {
+              //     // Navigator.push(
+              //     //   context,
+              //     //   MaterialPageRoute(builder: (context) => LoginIndexPage()),
+              //     // );
+              //   }),
+            ]
+
+        ),
         body:
         SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -44,8 +147,11 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Halo, Diana',
-                            style: CustomFont.orangeBigBold),
+                        if(user_vm.isLoggedIn == true)...[
+                          Text('Halo, ${user_vm.currentUser!.name}', style: CustomFont.orangeBigBold),
+                        ] else ...[
+                          Text('Halo', style: CustomFont.orangeBigBold),
+                        ],
                         SizedBox(height : 8),
                         Text('Sudahkah kamu berwakaf hari ini?',
                             style: CustomFont.blackMedBold),
@@ -164,7 +270,7 @@ class _HomePageState extends State<HomePage> {
                       SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
-                              children: programs.map((program) =>
+                              children: program_vm.program_list.map((program) =>
                                   ProgramTile(program)).toList())
                       ),
                     ],
@@ -175,8 +281,7 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-
-      bottomNavigationBar: BottomNavbar(current: 0),
+      bottomNavigationBar: BottomNavbar(current: 0))),
     );
   }
 }

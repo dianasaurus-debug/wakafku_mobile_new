@@ -2,8 +2,10 @@ import 'package:final_project_mobile/models/program.dart';
 import 'package:final_project_mobile/screens/program/detail.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
+import 'package:final_project_mobile/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
@@ -18,7 +20,7 @@ class ProgramTile extends StatelessWidget {
     return
     GestureDetector(
       onTap: (){
-        Route route = MaterialPageRoute(builder: (context) => ProgramDetail());
+        Route route = MaterialPageRoute(builder: (context) => ProgramDetail(program : this.program));
         Navigator.push(context, route);
       },
       child : Card(
@@ -33,7 +35,7 @@ class ProgramTile extends StatelessWidget {
                   height: 150,
                   width: 250,
                   child : Container(
-                    child: Image.network(program.cover, fit: BoxFit.cover),
+                    child: Image.network(IMG_PATH+program.cover, fit: BoxFit.cover),
                   ),
                 ),
                 Padding(
@@ -66,7 +68,7 @@ class ProgramTile extends StatelessWidget {
                                     color:CustomColor.theme, size : 20),
                                 SizedBox(width : 5),
                                 Text(
-                                  '6 Km',
+                                  '${program.distance.toStringAsFixed(1)} Km',
                                   style: CustomFont.blackSmallight,
                                 ),
                               ]
@@ -74,9 +76,6 @@ class ProgramTile extends StatelessWidget {
                           SizedBox(
                             height: 8,
                           ),
-                          Text('Lorem Ipsum is simply dummy text of the printing and typesetting industry. '
-                              'Lorem Ipsum has been the industry of type and scrambled it to make a .',
-                              style: TextStyle(fontSize: 12, overflow: TextOverflow.ellipsis), maxLines: 2)
 
                         ])),
               ],

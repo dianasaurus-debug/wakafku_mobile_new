@@ -8,15 +8,20 @@ import 'package:final_project_mobile/styles/button.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
 import 'package:final_project_mobile/utils/constants.dart';
+import 'package:final_project_mobile/view_models/program_vm.dart';
 import 'package:final_project_mobile/widgets/accordion.dart';
 import 'package:final_project_mobile/widgets/payment_tile.dart';
 import 'package:final_project_mobile/widgets/second_app_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../utils/network.dart';
 
 class ConfirmationForm extends StatefulWidget {
   @override
@@ -24,9 +29,32 @@ class ConfirmationForm extends StatefulWidget {
 }
 
 class ConfirmationFormState extends State<ConfirmationForm> {
+  void viewModel() {
+    context
+        .read<ProgramViewModel>().setNetworkService(context.read<BaseNetwork>());
+    context.read<ProgramViewModel>().fetchAllPrograms();
+  }
+
+  @override
+  void initState() {
+    viewModel();
+    super.initState();
+
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      context
+          .read<ProgramViewModel>()
+          .setNetworkService(context.read<BaseNetwork>());
+      final ProgramViewModel svm = context.read<ProgramViewModel>();
+      // messaging.getToken().then((value) {
+      //   svm.setFCMToken(value);
+      // });
+
+    });
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Consumer<ProgramViewModel>(
+        builder: (_, ProgramViewModel program_vm, __) => Scaffold(
       backgroundColor: CustomColor.whitebg,
       body: SingleChildScrollView(
           padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
@@ -85,7 +113,7 @@ class ConfirmationFormState extends State<ConfirmationForm> {
                                     Text('Nama Program',
                                         style: TextStyle(color: Colors.grey)),
                                     SizedBox(height: 5),
-                                    Text('Program Indonesia Sejahtera',
+                                    Text('${program_vm.currentProgram!.title}',
                                         style: CustomFont.blackMedBold),
                                   ]),
                               SizedBox(height: 8),
@@ -95,7 +123,7 @@ class ConfirmationFormState extends State<ConfirmationForm> {
                                     Text('Jenis Wakaf Uang',
                                         style: TextStyle(color: Colors.grey)),
                                     SizedBox(height: 5),
-                                    Text('Wakaf Abadi',
+                                    Text(program_vm.currentTransaction!.jenisWakaf == 'abadi'? 'Wakaf Abadi':'Wakaf Berjangka',
                                         style: CustomFont.blackMedBold),
                                   ]),
                               SizedBox(height: 8),
@@ -133,7 +161,7 @@ class ConfirmationFormState extends State<ConfirmationForm> {
                                                 SizedBox(height: 5),
                                                 Text(
                                                     formatCurrency.format(
-                                                        int.parse('500000')),
+                                                        int.parse(program_vm.currentTransaction!.amount ?? "Loading...")),
                                                     style: CustomFont
                                                         .blackMedBold),
                                                 SizedBox(height: 10),
@@ -147,7 +175,7 @@ class ConfirmationFormState extends State<ConfirmationForm> {
                                                             style: TextStyle(
                                                                 color: Colors.grey)),
                                                         SizedBox(height: 5),
-                                                        Text('2189181981918',
+                                                        Text(program_vm.currentTransaction!.paymentCode ?? "Loading...",
                                                             style: CustomFont
                                                                 .blackMedBold),
                                                       ]
@@ -166,10 +194,9 @@ class ConfirmationFormState extends State<ConfirmationForm> {
                                                         color: Colors.grey)),
                                                 SizedBox(height: 5),
                                                 Row(children: [
-                                                  Image.asset(
-                                                      'lib/assets/images/payment_logo/mandiri.png', width: 50),
+                                                  Image.network(BANK_LOGO_IMG_PATH+program_vm.currentTransaction!.paymentMethod!.logo, width: 50),
                                                   SizedBox(width: 5),
-                                                  Text('Bank Mandiri',
+                                                  Text('${program_vm.currentTransaction!.paymentMethod!.name}',
                                                       style:
                                                       CustomFont.blackMedBold),
                                                 ])
@@ -212,6 +239,6 @@ class ConfirmationFormState extends State<ConfirmationForm> {
             ],
           )),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
+    ));
   }
 }
