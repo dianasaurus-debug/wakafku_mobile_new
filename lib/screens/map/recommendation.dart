@@ -147,7 +147,6 @@ class _RecommendationPageState extends State<RecommendationPage>
           isInstructionOpened = true;
         });
         showModalBottomSheet(
-            isScrollControlled:true,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10.0),
             ),
@@ -157,6 +156,7 @@ class _RecommendationPageState extends State<RecommendationPage>
               return StatefulBuilder(builder: (BuildContext context, StateSetter setState /*You can rename this!*/) {
                 return Container(
                   padding: EdgeInsets.all(10),
+                  height : MediaQuery.of(context).size.height,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -181,22 +181,24 @@ class _RecommendationPageState extends State<RecommendationPage>
                       Divider(
                         color: CustomColor.themedarker,
                       ),
-                      ListView.separated(
-                        scrollDirection: Axis.vertical,
-                        shrinkWrap: true,
-                        itemCount: program_vm.route_instructions.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return ListTile(
-                            leading: Icon(program_vm.route_instructions[index].icon, size : 30),
-                            title: Html(data: """${program_vm.route_instructions[index].desc}"""),
-                            subtitle: Text(program_vm.route_instructions[index].distance, style: CustomFont.blackTinyLight),
-                          );
-                        },
-                        separatorBuilder: (context, position) {
-                          return Divider(
-                            color: CustomColor.themedarker,
-                          );
-                        },
+                      SingleChildScrollView(
+                        child : ListView.separated(
+                          scrollDirection: Axis.vertical,
+                          shrinkWrap: true,
+                          itemCount: program_vm.route_instructions.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return ListTile(
+                              leading: Icon(program_vm.route_instructions[index].icon, size : 30),
+                              title: Html(data: """${program_vm.route_instructions[index].desc}"""),
+                              subtitle: Text(program_vm.route_instructions[index].distance, style: CustomFont.blackTinyLight),
+                            );
+                          },
+                          separatorBuilder: (context, position) {
+                            return Divider(
+                              color: CustomColor.themedarker,
+                            );
+                          },
+                        )
                       )
                     ],
                   ),

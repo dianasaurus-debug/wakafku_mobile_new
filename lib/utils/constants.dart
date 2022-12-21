@@ -15,7 +15,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 import '../models/mode.dart';
 
-const domain_local = 'http://192.168.1.55:8000';
+const domain_local = 'http://192.168.1.8:8000';
 const API_URL = '${domain_local}/api';
 const IMG_PATH = '${domain_local}/img/';
 const BANK_LOGO_IMG_PATH = '${domain_local}/images/payment_logo/';

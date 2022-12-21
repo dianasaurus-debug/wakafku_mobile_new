@@ -15,14 +15,14 @@ import 'package:provider/single_child_widget.dart';
 
 import 'screens/program/waqf_form/payment_form.dart';
 import 'utils/network.dart';
-Future<void> _messageHandler(RemoteMessage message) async {
-  print('background message ${message.notification!.body}');
-}
+// Future<void> _messageHandler(RemoteMessage message) async {
+//   print('background message ${message.notification!.body}');
+// }
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(_messageHandler);
+  // WidgetsFlutterBinding.ensureInitialized();
+  // await Firebase.initializeApp();
+  // FirebaseMessaging.onBackgroundMessage(_messageHandler);
   runApp(MyApp());
 }
 
