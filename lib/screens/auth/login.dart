@@ -45,28 +45,29 @@ class LoginPageState extends State<LoginPage> with DialogMixin  {
 
   late TextEditingController emailController;
   late TextEditingController passwordController;
-  // late FirebaseMessaging messaging;
+  late FirebaseMessaging messaging;
 
   @override
   void initState() {
     super.initState();
-    // messaging = FirebaseMessaging.instance;
+    messaging = FirebaseMessaging.instance;
 
     emailController = TextEditingController();
     passwordController = TextEditingController();
 
-    // FirebaseMessaging.onMessageOpenedApp.listen((message) {
-    //   Get.to(const NotificationPage());
-    // });
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      // Get.to(const Notification());
+    });
+
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       context
           .read<AuthViewModel>()
           .setNetworkService(context.read<BaseNetwork>());
       final AuthViewModel svm = context.read<AuthViewModel>();
-      // messaging.getToken().then((value) {
-      //   // svm.setFCMToken(value);
-      //   print('token : ${value}');
-      // });
+      messaging.getToken().then((value) {
+        svm.setFCMToken(value);
+        print('token : ${value}');
+      });
       emailController.text = svm.email;
       passwordController.text = '';
       svm.password = '';
@@ -102,41 +103,6 @@ class LoginPageState extends State<LoginPage> with DialogMixin  {
                             ),
                           ),
                           SizedBox(height : 15),
-                          Padding(
-                            padding : EdgeInsets.symmetric(horizontal: 20),
-                            child : Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children : [
-                                  ElevatedButton(
-                                    style: CustomButton.buttonSocial,
-                                    onPressed: () {
-
-                                    },
-                                    child: Row(
-                                        children : [
-                                          Icon(FontAwesomeIcons.facebook, color: CustomColor.theme, size: 25,),
-                                          SizedBox(width: 5,),
-                                          Text('Facebook', style: CustomFont.orangeMedBold,)
-                                        ]
-                                    ),
-                                  ),
-                                  ElevatedButton(
-                                    style: CustomButton.buttonSocial,
-                                    onPressed: () {
-
-                                    },
-                                    child: Row(
-                                        children : [
-                                          Icon(FontAwesomeIcons.google, color: CustomColor.theme,size: 25,),
-                                          SizedBox(width: 5,),
-                                          Text('Google', style: CustomFont.orangeMedBold,)
-                                        ]
-                                    ),
-                                  ),
-
-                                ]
-                            ),
-                          ),
                           const SizedBox(height: 20),
                           Form(
                             key: _formKey,
@@ -144,7 +110,6 @@ class LoginPageState extends State<LoginPage> with DialogMixin  {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: <Widget>[
                                 TextFormField(
-
                                   // The validator receives the text that the user has entered.
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {

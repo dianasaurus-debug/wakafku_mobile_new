@@ -3,6 +3,7 @@ import 'package:final_project_mobile/screens/map/recommendation.dart';
 import 'package:final_project_mobile/screens/welcome/splash_screen.dart';
 import 'package:final_project_mobile/utils/routes.dart';
 import 'package:final_project_mobile/view_models/auth_vm.dart';
+import 'package:final_project_mobile/view_models/payment_vm.dart';
 import 'package:final_project_mobile/view_models/program_vm.dart';
 import 'package:final_project_mobile/view_models/program_vm.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -15,14 +16,14 @@ import 'package:provider/single_child_widget.dart';
 
 import 'screens/program/waqf_form/payment_form.dart';
 import 'utils/network.dart';
-// Future<void> _messageHandler(RemoteMessage message) async {
-//   print('background message ${message.notification!.body}');
-// }
+Future<void> _messageHandler(RemoteMessage message) async {
+  print('background message ${message.notification!.body}');
+}
 
 void main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
-  // FirebaseMessaging.onBackgroundMessage(_messageHandler);
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_messageHandler);
   runApp(MyApp());
 }
 
@@ -39,6 +40,9 @@ class MyApp extends StatelessWidget {
           ),
           ChangeNotifierProvider<AuthViewModel>(
             create: (_) => AuthViewModel(),
+          ),
+          ChangeNotifierProvider<PaymentViewModel>(
+            create: (_) => PaymentViewModel(),
           ),
 
         ],

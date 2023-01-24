@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
+
 class Category {
   final String name;
   final String desc;
   final String label;
-  final String image;
+  final IconData image;
 
   final int id;
 

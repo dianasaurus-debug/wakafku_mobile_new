@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:badges/badges.dart';
 import 'package:final_project_mobile/models/instruction.dart';
 import 'package:final_project_mobile/models/program.dart';
 import 'package:final_project_mobile/screens/map/list_programs.dart';
 import 'package:final_project_mobile/styles/button.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
+import 'package:final_project_mobile/view_models/firebase_service.dart';
 import 'package:final_project_mobile/widgets/bottom_navbar.dart';
 import 'package:final_project_mobile/widgets/second_app_bar.dart';
 import 'package:flutter/cupertino.dart';
@@ -49,7 +51,7 @@ class _RecommendationPageState extends State<RecommendationPage>
   double _lng = 111.761466;
   late CameraPosition _currentPosition = CameraPosition(
     target: LatLng(_lat, _lng),
-    zoom: 16,
+    zoom: 12,
   );
   Completer<GoogleMapController> _controller = Completer();
   var mapController;
@@ -81,7 +83,7 @@ class _RecommendationPageState extends State<RecommendationPage>
       setState(() {
         _currentPosition = CameraPosition(
           target: LatLng(res.latitude!, res.longitude!),
-          zoom: 16,
+          zoom: 12,
         );
         _lat = res.latitude!;
         _lng = res.longitude!;
@@ -139,7 +141,7 @@ class _RecommendationPageState extends State<RecommendationPage>
     final GoogleMapController controller = await _controller.future;
     final _position = CameraPosition(
       target: LatLng(_lat, _lng),
-      zoom: 16,
+      zoom: 12,
     );
     program_vm.fetchDirections().then((value) {
       if (program_vm.route_instructions.length > 0) {
@@ -147,6 +149,7 @@ class _RecommendationPageState extends State<RecommendationPage>
           isInstructionOpened = true;
         });
         showModalBottomSheet(
+            isScrollControlled: true,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10.0),
             ),
@@ -154,9 +157,8 @@ class _RecommendationPageState extends State<RecommendationPage>
             context: context,
             builder: (context) {
               return StatefulBuilder(builder: (BuildContext context, StateSetter setState /*You can rename this!*/) {
-                return Container(
+                return SingleChildScrollView(
                   padding: EdgeInsets.all(10),
-                  height : MediaQuery.of(context).size.height,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -215,8 +217,12 @@ class _RecommendationPageState extends State<RecommendationPage>
     });
     final Uint8List markerIcon = await getBytesFromAsset(
         'lib/assets/images/maps/icon-lokasi-saya.png', 80);
-    final Uint8List waqfLocation = await getBytesFromAsset(
-        'lib/assets/images/maps/program_marker.png', 120);
+    final Uint8List waqfLocationHighRecommended = await getBytesFromAsset(
+        'lib/assets/images/maps/program_marker_high.png', 120);
+    final Uint8List waqfLocationRecommended = await getBytesFromAsset(
+        'lib/assets/images/maps/program_marker_med.png', 120);
+    final Uint8List waqfLocationNotRecommended = await getBytesFromAsset(
+        'lib/assets/images/maps/program_marker_low.png', 120);
     _controller.complete(controller);
     final ProgramViewModel svm = context.read<ProgramViewModel>();
     context.read<ProgramViewModel>().fetchAllPrograms().then((value) {
@@ -232,9 +238,17 @@ class _RecommendationPageState extends State<RecommendationPage>
         );
       });
       for (Program program in svm.program_list) {
+        Uint8List chosen_marker = waqfLocationRecommended;
+        if(program.cluster_id==0){
+          chosen_marker = waqfLocationNotRecommended;
+        } else if(program.cluster_id==1){
+          chosen_marker = waqfLocationRecommended;
+        } else if(program.cluster_id==2){
+          chosen_marker = waqfLocationHighRecommended;
+        }
         final marker = Marker(
           markerId: MarkerId(program.id.toString()),
-          icon: BitmapDescriptor.fromBytes(waqfLocation),
+          icon: BitmapDescriptor.fromBytes(chosen_marker),
           position: LatLng(
               double.parse(program.latitude), double.parse(program.longitude)),
           infoWindow: InfoWindow(
@@ -247,7 +261,7 @@ class _RecommendationPageState extends State<RecommendationPage>
                 new CameraPosition(
                     target: LatLng(double.parse(program.latitude),
                         double.parse(program.longitude)),
-                    zoom: 18)));
+                    zoom: 12)));
             if (isNavigating == false) {
               showModalBottomSheet(
                   context: context,
@@ -281,29 +295,24 @@ class _RecommendationPageState extends State<RecommendationPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(program.title, style: CustomFont.blackMedBold),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(children: [
-                      Icon(FontAwesomeIcons.mapLocation,
-                          color: CustomColor.theme, size: 20),
-                      SizedBox(width: 10),
-                      Text(
-                        '${program.address_detail}',
-                        style: CustomFont.blackMedLight,
-                      ),
-                    ]),
-                    Row(children: [
-                      Icon(FontAwesomeIcons.arrowRight,
-                          color: CustomColor.theme, size: 20),
-                      SizedBox(width: 5),
-                      Text(
-                        '${program.distance.toStringAsFixed(1)} Km',
-                        style: CustomFont.blackMedBold,
-                      ),
-                    ]),
-                  ],
-                ),
+                Row(children: [
+                  Icon(FontAwesomeIcons.mapLocation,
+                      color: CustomColor.theme, size: 20),
+                  SizedBox(width: 10),
+                  Expanded(child: Text(
+                    '${program.address_detail}',
+                    style: CustomFont.blackMedLight,
+                  ))
+                ]),
+                Row(children: [
+                  Icon(FontAwesomeIcons.arrowRight,
+                      color: CustomColor.theme, size: 20),
+                  SizedBox(width: 5),
+                  Text(
+                    '${program.distance.toStringAsFixed(1)} Km',
+                    style: CustomFont.blackMedBold,
+                  ),
+                ]),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -315,9 +324,18 @@ class _RecommendationPageState extends State<RecommendationPage>
                         style: CustomFont.blackBigBold),
                   ],
                 ),
-                SizedBox(height: 10),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: Badge(
+                    toAnimate: false,
+                    shape: BadgeShape.square,
+                    badgeColor: Colors.green,
+                    borderRadius: BorderRadius.circular(8),
+                    badgeContent: Text(KMEANS_STATUS[program.cluster_id], style: CustomFont.whiteSmallBold),
+                  ),
+                ),
                 Container(
-                  height: 200,
+                  height: 180,
                   width: double.infinity,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
@@ -329,7 +347,7 @@ class _RecommendationPageState extends State<RecommendationPage>
                     borderRadius: BorderRadius.all(Radius.circular(4.0)),
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 10),
                 Row(children: [
                   ElevatedButton(
                       child: Row(
@@ -437,9 +455,7 @@ class _RecommendationPageState extends State<RecommendationPage>
   @override
   void initState() {
     _locateMe();
-    // Future.delayed(Duration(seconds: 0)).then((_) {
-    //   showListProgram();
-    // });
+    FirebaseService.inAppFirebaseNotif();
     viewModel();
 
     super.initState();
@@ -509,11 +525,6 @@ class _RecommendationPageState extends State<RecommendationPage>
                                   filled: true,
                                   isDense: true,
                                   fillColor: CustomColor.white1,
-                                  suffixIcon: GestureDetector(
-                                    onTap: () {},
-                                    child: Icon(Icons.filter_list_alt,
-                                        color: CustomColor.theme),
-                                  ),
                                   prefixIcon: Padding(
                                     padding:
                                         EdgeInsets.only(left: 10, right: 10),
@@ -522,7 +533,7 @@ class _RecommendationPageState extends State<RecommendationPage>
                                   ),
                                   prefixIconConstraints: BoxConstraints(
                                     minWidth: 25,
-                                    minHeight: 20,
+                                    minHeight: 40,
                                   ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.all(
@@ -644,6 +655,7 @@ class _RecommendationPageState extends State<RecommendationPage>
                   ],
                   Expanded(
                     child: GoogleMap(
+                      zoomGesturesEnabled: true,
                       myLocationEnabled: true,
                       onMapCreated: _onMapCreated,
                       initialCameraPosition: _currentPosition,

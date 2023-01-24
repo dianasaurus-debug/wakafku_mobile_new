@@ -7,6 +7,7 @@ class Program {
   late String cover = '';
   late String terkumpul = '';
   late double distance = 0;
+  int cluster_id = 0;
   late int id;
 
   Program({this.id = 0,
@@ -17,12 +18,14 @@ class Program {
     this.longitude = '',
     this.cover = '',
     this.distance = 0,
+    this.cluster_id = 0,
     this.terkumpul = ''});
 
   Program.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         title = json['title'],
         desc = json['desc'],
+        cluster_id = int.parse(json['cluster_id']),
         address_detail = json['address_detail'],
         latitude = json['latitude'],
         longitude = json['longitude'],

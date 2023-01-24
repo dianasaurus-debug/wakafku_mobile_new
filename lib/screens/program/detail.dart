@@ -3,12 +3,15 @@ import 'dart:ui';
 
 import 'package:final_project_mobile/models/program.dart';
 import 'package:final_project_mobile/screens/auth/login.dart';
+import 'package:final_project_mobile/screens/profile/add_schedule.dart';
+import 'package:final_project_mobile/screens/program/report.dart';
 import 'package:final_project_mobile/screens/program/waqf_form/detail_form.dart';
 import 'package:final_project_mobile/screens/program/waqf_form/form.dart';
 import 'package:final_project_mobile/styles/button.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
 import 'package:final_project_mobile/utils/mixins/dialog_mixin.dart';
+import 'package:final_project_mobile/view_models/payment_vm.dart';
 import 'package:final_project_mobile/view_models/program_vm.dart';
 import 'package:final_project_mobile/widgets/app_bar.dart';
 import 'package:final_project_mobile/widgets/bottom_navbar.dart';
@@ -41,6 +44,8 @@ class _ProgramDetailState extends State<ProgramDetail> with DialogMixin {
   bool isDescExpanded = false;
 
   void viewModel() {
+    context
+        .read<PaymentViewModel>().setNetworkService(context.read<BaseNetwork>());
     context
         .read<ProgramViewModel>().setNetworkService(context.read<BaseNetwork>());
     context.read<ProgramViewModel>().fetchAllPrograms();
@@ -80,9 +85,7 @@ class _ProgramDetailState extends State<ProgramDetail> with DialogMixin {
             ),
           ],
           elevation: 0),
-      body:
-
-      SingleChildScrollView(
+      body: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -139,17 +142,17 @@ class _ProgramDetailState extends State<ProgramDetail> with DialogMixin {
                 ),
                 Padding(
                     padding: EdgeInsets.only(top: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Row(children: [
                           Icon(FontAwesomeIcons.mapLocation,
                               color: CustomColor.theme, size: 20),
                           SizedBox(width: 10),
-                          Text(
+                          Expanded(child: Text(
                             '${widget.program.address_detail}',
                             style: CustomFont.blackMedLight,
-                          ),
+                          ),)
                         ]),
                         Row(children: [
                           Icon(FontAwesomeIcons.arrowRight,
@@ -190,7 +193,8 @@ class _ProgramDetailState extends State<ProgramDetail> with DialogMixin {
                             label:
                             Text('Laporan', style: CustomFont.whiteSmallBold),
                             onPressed: () {
-                              print('Button Pressed');
+                              Route route = MaterialPageRoute(builder: (context) => ProgramReport(program : widget.program));
+                              Navigator.push(context, route);
                             },
                             style: ElevatedButton.styleFrom(
                               onPrimary: CustomColor.themedarker,
@@ -235,29 +239,6 @@ class _ProgramDetailState extends State<ProgramDetail> with DialogMixin {
                   ),
                 ),
                 Padding(
-                    padding: EdgeInsets.symmetric(vertical: 5),
-                    child: Divider(
-                      color: CustomColor.lightgrey,
-                    )),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Dibuat Oleh', style: CustomFont.blackMedBold),
-                    SizedBox(height: 10),
-                    Row(
-                      children: [
-                        CircleAvatar(
-                            radius: 25,
-                            backgroundImage:
-                                AssetImage('lib/assets/images/sample_pic.jpg')),
-                        SizedBox(width: 10),
-                        Text('Al-Hikmah\nTuban',
-                            style: CustomFont.blackMedLight)
-                      ],
-                    )
-                  ],
-                ),
-                Padding(
                   padding: EdgeInsets.only(top: 15, bottom: 50),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,21 +251,42 @@ class _ProgramDetailState extends State<ProgramDetail> with DialogMixin {
                 ),
               ])),
 
-      floatingActionButton: Container(
+      floatingActionButton:
+      Consumer<PaymentViewModel>(
+        builder: (_, PaymentViewModel payment_vm, __) =>
+      Container(
           padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
           child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                    child: ElevatedButton(
+                    child:
+                    PopupMenuButton<int>(
+                      child:
+                      Container(
+                        padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text("Berwakaf", style: CustomFont.whiteBigBold),
                             ]),
-                        style: CustomButton.buttonSubmit,
-                        onPressed: () {
+                        width: double.infinity,
+                        decoration: ShapeDecoration(
+                            color: CustomColor.theme,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                            ),
+                        ),
+                        //child: Icon(Icons.menu, color: Colors.white), <-- You can give your icon here
+                      ),
+                      itemBuilder: (context) => [
+                        PopupMenuItem<int>(value: 0, child: Text("Bayar Sekarang")),
+                        PopupMenuItem<int>(
+                            value: 1, child: Text("Jadwalkan Pembayaran")),
+                      ],
+                      onSelected: (item){
+                        if(item==0){
                           if(user_vm.isLoggedIn==true){
                             program_vm.setProgram(widget.program);
                             Route route = MaterialPageRoute(
@@ -299,8 +301,14 @@ class _ProgramDetailState extends State<ProgramDetail> with DialogMixin {
                                   () => Get.offAll(LoginPage()),
                             );
                           }
-
-                        })),
+                        } else {
+                          payment_vm.setProgram(widget.program);
+                          Route route = MaterialPageRoute(
+                              builder: (context) => AddReminderPage());
+                          Navigator.push(context, route);
+                        }
+                      },
+                    )),
                 SizedBox(width: 10),
                 Expanded(
                     child: ElevatedButton(
@@ -311,7 +319,7 @@ class _ProgramDetailState extends State<ProgramDetail> with DialogMixin {
                             ]),
                         style: CustomButton.buttonSubmit,
                         onPressed: () => {}))
-              ])),
+              ]))),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       bottomNavigationBar: BottomNavbar(current: 3),
     )));

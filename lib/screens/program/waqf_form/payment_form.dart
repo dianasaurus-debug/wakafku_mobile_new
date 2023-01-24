@@ -8,6 +8,7 @@ import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
 import 'package:final_project_mobile/utils/constants.dart';
 import 'package:final_project_mobile/widgets/accordion.dart';
+import 'package:final_project_mobile/widgets/loading_screen.dart';
 import 'package:final_project_mobile/widgets/payment_tile.dart';
 import 'package:final_project_mobile/widgets/second_app_bar.dart';
 import 'package:flutter/cupertino.dart';
@@ -124,8 +125,7 @@ class PaymentFormState extends State<PaymentForm> with DialogMixin {
           appBar: SecondAppBar(appBar: AppBar(), title : 'Pembayaran'),
           body: SingleChildScrollView(
             padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-            child:
-            Column(
+            child: program_vm.isLoading == false ? Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children : [
                   Padding(
@@ -135,20 +135,62 @@ class PaymentFormState extends State<PaymentForm> with DialogMixin {
                         child : Text('Pilih Metode Pembayaran', style: CustomFont.blackBigBold),
                       )
                   ),
-                  ListView.builder(
-                      key: Key(
-                          'builder ${selected.toString()}'),
-                      //attention
-                      physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
-                      itemCount: program_vm.all_bank.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return _paymentTile(index, program_vm.all_bank[index], program_vm);
-                      },
-                    ),
+                  Accordion(
+                    const Text(
+                        'Virtual Account',
+                        style: CustomFont.blackMedBold),
+                      ListView.builder(
+                        key: Key(
+                            'builder ${selected.toString()}'),
+                        //attention
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        itemCount: program_vm.all_bank.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return _paymentTile(index, program_vm.all_bank[index], program_vm);
+                        },
+                      )
+                  ),
+                  SizedBox(height: 20),
+                  Accordion(
+                      const Text(
+                          'E-Wallet',
+                          style: CustomFont.blackMedBold),
+                      ListView.builder(
+                        key: Key(
+                            'builder ${selected.toString()}'),
+                        //attention
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        itemCount: program_vm.all_ewallet.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return _paymentTile(index, program_vm.all_ewallet[index], program_vm);
+                        },
+                      )
+                  ),
+                  SizedBox(height: 20),
+                  // Accordion(
+                  //     const Text(
+                  //         'Bayar di Minimarket',
+                  //         style: CustomFont.blackMedBold),
+                  //     ListView.builder(
+                  //       key: Key(
+                  //           'builder ${selected.toString()}'),
+                  //       //attention
+                  //       physics: NeverScrollableScrollPhysics(),
+                  //       shrinkWrap: true,
+                  //       scrollDirection: Axis.vertical,
+                  //       itemCount: program_vm.all_retail.length,
+                  //       itemBuilder: (BuildContext context, int index) {
+                  //         return _paymentTile(index, program_vm.all_retail[index], program_vm);
+                  //       },
+                  //     )
+                  // ),
+
                 ]
-            ),
+            ) : LoadingScreen(),
           ),
         floatingActionButton: Container(
           color: Colors.white,

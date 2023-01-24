@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:final_project_mobile/mixins/dialog_mixin.dart';
-import 'package:final_project_mobile/screens/transaction/notification.dart';
 import 'package:final_project_mobile/styles/font.dart';
 import 'package:final_project_mobile/utils/constants.dart';
 import 'package:final_project_mobile/view_models/firebase_service.dart';
@@ -10,6 +9,8 @@ import 'package:final_project_mobile/view_models/payment_vm.dart';
 import 'package:final_project_mobile/widgets/app_bar.dart';
 import 'package:final_project_mobile/widgets/bottom_navbar.dart';
 import 'package:final_project_mobile/widgets/history_tile.dart';
+import 'package:final_project_mobile/widgets/notification_tile.dart';
+import 'package:final_project_mobile/widgets/reminder_tile.dart';
 import 'package:final_project_mobile/widgets/second_app_bar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -21,13 +22,14 @@ import 'package:provider/provider.dart';
 import '../../utils/network.dart';
 import '../../view_models/auth_vm.dart';
 import '../../widgets/loading_screen.dart';
+import '../transaction/notification.dart';
 
-class HistoryPage extends StatefulWidget {
+class ReminderPage extends StatefulWidget {
   @override
-  _HistoryPageState createState() => _HistoryPageState();
+  _ReminderPageState createState() => _ReminderPageState();
 }
 
-class _HistoryPageState extends State<HistoryPage> with DialogMixin {
+class _ReminderPageState extends State<ReminderPage> with DialogMixin {
   late FirebaseMessaging messaging;
 
   @override
@@ -44,7 +46,7 @@ class _HistoryPageState extends State<HistoryPage> with DialogMixin {
       final AuthViewModel uvm = context.read<AuthViewModel>();
       context.read<AuthViewModel>().fetchUser().then((value) {
         if (uvm.isLoggedIn != false) {
-          context.read<PaymentViewModel>().fetchAllPayments();
+          context.read<PaymentViewModel>().fetchAllReminders();
         } else {
           showErrorSnackbar('Silahkan login terlebih dahulu!');
           Get.toNamed<void>('/login');
@@ -65,22 +67,23 @@ class _HistoryPageState extends State<HistoryPage> with DialogMixin {
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
       Get.to(NotificationPage());
     });
+
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: SecondAppBar(appBar: AppBar(), title : 'Histori'),
+      appBar: SecondAppBar(appBar: AppBar(), title : 'Daftar Pengingat'),
       body:
       Consumer<PaymentViewModel>(
         builder: (_, PaymentViewModel vm, __) {
           if (vm.isLoading) {
             return LoadingScreen();
           } else {
-            if (vm.all_payments.isEmpty) {
+            if (vm.all_reminders.isEmpty) {
               return const Center(
-                child: Text('Histori pembayaran kosong',
+                child: Text('Data pengingat kosong',
                     style: CustomFont.smallTheme),
               );
             } else {
@@ -89,9 +92,9 @@ class _HistoryPageState extends State<HistoryPage> with DialogMixin {
                 child: ListView.builder(
                   scrollDirection: Axis.vertical,
                   shrinkWrap: true,
-                  itemCount: vm.all_payments.length,
+                  itemCount: vm.all_reminders.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return TransactionTile(vm.all_payments[index]);
+                    return ReminderTile(vm.all_reminders[index], vm);
                   },
                 ),
               );
@@ -99,7 +102,6 @@ class _HistoryPageState extends State<HistoryPage> with DialogMixin {
           }
         },
       ),
-      bottomNavigationBar: BottomNavbar(current: 2),
     );
   }
 }

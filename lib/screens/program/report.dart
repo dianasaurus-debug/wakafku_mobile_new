@@ -6,16 +6,30 @@ import 'package:final_project_mobile/screens/program/waqf_form/form.dart';
 import 'package:final_project_mobile/styles/button.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
+import 'package:final_project_mobile/view_models/program_vm.dart';
 import 'package:final_project_mobile/widgets/app_bar.dart';
 import 'package:final_project_mobile/widgets/bottom_navbar.dart';
+import 'package:final_project_mobile/widgets/report_widget.dart';
 import 'package:final_project_mobile/widgets/second_app_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 
+import '../../models/program.dart';
 import '../../utils/constants.dart';
+import '../../utils/network.dart';
+import '../../widgets/loading_screen.dart';
 
 class ProgramReport extends StatefulWidget {
+  final Program program;
+
+  const ProgramReport(
+      {Key? key,
+        required this.program
+      })
+      : super(key: key);
   @override
   _ProgramReportState createState() => _ProgramReportState();
 }
@@ -24,6 +38,12 @@ class _ProgramReportState extends State<ProgramReport> {
   @override
   void initState() {
     super.initState();
+    super.initState();
+    context
+        .read<ProgramViewModel>()
+        .setNetworkService(context.read<BaseNetwork>());
+    context.read<ProgramViewModel>().fetchAllReports(widget.program.id);
+
   }
 
   @override
@@ -38,45 +58,32 @@ class _ProgramReportState extends State<ProgramReport> {
             onPressed: () => Navigator.of(context).pop(),
           ),
           elevation: 0),
-      body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                
-              ])),
-      floatingActionButton: Container(
-          padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
-          child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                    child: ElevatedButton(
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text("Berwakaf", style: CustomFont.whiteBigBold),
-                            ]),
-                        style: CustomButton.buttonSubmit,
-                        onPressed: () {
-                          Route route = MaterialPageRoute(
-                              builder: (context) => DetailForm());
-                          Navigator.push(context, route);
-                        })),
-                SizedBox(width: 10),
-                Expanded(
-                    child: ElevatedButton(
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text("Navigasi", style: CustomFont.whiteBigBold),
-                            ]),
-                        style: CustomButton.buttonSubmit,
-                        onPressed: () => {}))
-              ])),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      body: Consumer<ProgramViewModel>(
+        builder: (_, ProgramViewModel vm, __) {
+          if (vm.isLoading) {
+            return LoadingScreen();
+          } else {
+            if (vm.all_reports.isEmpty) {
+              return const Center(
+                child: Text('Laporan Program Kosong',
+                    style: CustomFont.smallTheme),
+              );
+            } else {
+              return SingleChildScrollView(
+                padding: EdgeInsets.all(10),
+                child: ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemCount: vm.all_reports.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return ReportTile(vm.all_reports[index]);
+                  },
+                ),
+              );
+            }
+          }
+        },
+      ),
     );
   }
 }

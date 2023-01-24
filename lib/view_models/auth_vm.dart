@@ -203,7 +203,7 @@ class AuthViewModel extends ChangeNotifier with DialogMixin {
         isLoading = false;
       }
     } else {
-      print('harus login!');
+
       isLoading = false;
       isLoggedIn = false;
     }

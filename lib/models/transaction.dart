@@ -3,18 +3,21 @@ import 'package:final_project_mobile/models/payment_method.dart';
 import 'package:final_project_mobile/models/program.dart';
 
 class Transaction {
+  int? id;
   String? paymentCode;
   String? message;
   String? amount;
   String? paidAt;
   PaymentMethod? paymentMethod;
   Program? program;
-  int? status;
+  String? status;
   String? jenisWakaf;
   String? atasNama;
+  String? createdAt;
 
   Transaction(
-      {this.paymentCode,
+      {this.id,
+        this.paymentCode,
         this.message,
         this.amount,
         this.paidAt,
@@ -25,6 +28,7 @@ class Transaction {
         this.atasNama});
 
   Transaction.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
     paymentCode = json['payment_code'];
     message = json['message'];
     amount = json['amount'].toString();
@@ -35,6 +39,7 @@ class Transaction {
     status = json['status'];
     jenisWakaf = json['jenis_wakaf'];
     atasNama = json['atas_nama'];
+    createdAt = json['created_at'];
   }
 
   Map<String, dynamic> toJson() {

@@ -11,7 +11,7 @@ class User {
   String? created_at;
   String? occupation;
   String? gender;
-  int? user_id;
+  String? user_id;
 
   User({
     this.id = 0,
@@ -24,7 +24,7 @@ class User {
     this.otp_expires_at,
     this.is_verified = false,
     this.gender,
-    this.user_id = 0,
+    this.user_id = '',
   });
 
   User.fromJson(Map<String, dynamic> json)

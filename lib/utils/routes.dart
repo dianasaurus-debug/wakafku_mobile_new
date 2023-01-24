@@ -14,6 +14,10 @@ class Routes {
     GetPage(
       name: '/login',
       page: () => LoginPage(),
+    ),
+    GetPage(
+      name: '/list-category',
+      page: () => LoginPage(),
     )
 
   ];

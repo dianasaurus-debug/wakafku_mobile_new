@@ -1,6 +1,7 @@
 import 'package:badges/badges.dart';
 import 'package:final_project_mobile/models/program.dart';
 import 'package:final_project_mobile/models/transaction.dart';
+import 'package:final_project_mobile/screens/transaction/detail.dart';
 import 'package:final_project_mobile/styles/button.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
@@ -8,6 +9,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+
+import '../utils/constants.dart';
 
 class TransactionTile extends StatelessWidget {
   const TransactionTile(this.transaction);
@@ -17,7 +20,12 @@ class TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return
+      GestureDetector(
+        onTap: (){
+      Route route = MaterialPageRoute(builder: (context) => TransactionDetail(transaction : this.transaction));
+      Navigator.push(context, route);
+    }, child: Container(
         margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
         width: double.infinity,
         decoration: BoxDecoration(
@@ -40,8 +48,8 @@ class TransactionTile extends StatelessWidget {
                 Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('${transaction.paidAt}', style: CustomFont.blackSmallight),
-                Text('11:20 WIB', style: CustomFont.blackSmallight)
+                Text('${convertToDate(transaction.createdAt)}', style: CustomFont.blackSmallight),
+                Text('${convertToTime(transaction.createdAt)}', style: CustomFont.blackSmallight)
               ],
             ),
                 Divider(
@@ -65,15 +73,15 @@ class TransactionTile extends StatelessWidget {
                       child : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Rp 800.000', style: CustomFont.blackMedBold),
-                          Text('Program Indonesia Berwakaf', style: CustomFont.blackSmallight),
+                          Text('Rp ${transaction.amount}', style: CustomFont.blackMedBold),
+                          Text('${transaction.program!.title}', style: CustomFont.blackSmallight),
                           SizedBox(height : 5),
                           Badge(
                             toAnimate: false,
                             shape: BadgeShape.square,
-                            badgeColor: Colors.green,
+                            badgeColor: PAYMENT_STATUS_COLOR[int.parse(transaction.status!)],
                             borderRadius: BorderRadius.circular(8),
-                            badgeContent: Text('Berhasil', style: CustomFont.whiteSmallight),
+                            badgeContent: Text(PAYMENT_STATUS[int.parse(transaction.status!)], style: CustomFont.whiteSmallBold),
                           )
                         ],
                       )
@@ -85,6 +93,6 @@ class TransactionTile extends StatelessWidget {
           // trailing: Text('6 Km',
           //     style: CustomFont.orangeMedBold),
         )
-    );
+    ));
   }
 }

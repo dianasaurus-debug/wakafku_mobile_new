@@ -59,15 +59,20 @@ class ProgramTileHorizontal extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(program.title, style: CustomFont.blackMedBold),
-                      Row(children: [
-                        Icon(FontAwesomeIcons.locationPin,
-                            color: CustomColor.theme, size: 20),
-                        SizedBox(width: 5),
-                        Text(
-                          program.address_detail,
-                          style: CustomFont.blackSmallight,
-                        ),
-                      ]),
+                      Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children : [
+                            Icon(FontAwesomeIcons.locationPin,
+                                color:CustomColor.theme, size: 20),
+                            SizedBox(width : 5),
+                            Expanded(
+                              child : Text(
+                                program.address_detail,
+                                style: CustomFont.blackTinyLight,
+                              ),
+                            )
+                          ]
+                      ),
                       Row(children: [
                         Icon(FontAwesomeIcons.arrowRight,
                             color: CustomColor.theme, size: 20),

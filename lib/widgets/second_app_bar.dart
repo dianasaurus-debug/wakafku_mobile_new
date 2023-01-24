@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:final_project_mobile/screens/transaction/notification.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
 import 'package:flutter/cupertino.dart';
@@ -32,10 +33,10 @@ class SecondAppBar extends StatelessWidget implements PreferredSizeWidget {
               icon: Icon(CupertinoIcons.bell_fill,
                   color: CustomColor.theme),
               onPressed: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => LoginIndexPage()),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NotificationPage()),
+                );
               }),
         ]
 

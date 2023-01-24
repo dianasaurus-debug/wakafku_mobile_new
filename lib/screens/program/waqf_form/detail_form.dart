@@ -4,6 +4,7 @@ import 'package:final_project_mobile/screens/program/waqf_form/payment_form.dart
 import 'package:final_project_mobile/styles/button.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
+import 'package:final_project_mobile/utils/constants.dart';
 import 'package:final_project_mobile/utils/network.dart';
 import 'package:final_project_mobile/view_models/program_vm.dart';
 import 'package:final_project_mobile/widgets/second_app_bar.dart';
@@ -82,7 +83,7 @@ class DetailFormState extends State<DetailForm> {
                   )
               ),
               Padding(
-                  padding: EdgeInsets.symmetric(vertical : 10),
+                  padding: EdgeInsets.only(top : 10),
                   child :  Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children : [
@@ -126,6 +127,29 @@ class DetailFormState extends State<DetailForm> {
                         ),
                       ])
               ),
+              SingleChildScrollView(
+                  scrollDirection:
+                  Axis.horizontal,
+                  child: Row(
+                      children: amounts
+                          .map((e) => Container(
+                          margin: EdgeInsets.only(left: 7.0),
+                          child: ChoiceChip(
+                            label: Text(e, style: CustomFont.blackSmallight,),
+                            selected: nominalController.text == e,
+                            selectedColor: CustomColor.theme,
+                            onSelected: (bool selected) {
+                              setState(
+                                      () {
+                                    nominalController.text = e;
+                                    program_vm.onAmountChange(e);
+                                  });
+                            },
+                            backgroundColor: Colors.white,
+                            labelStyle: TextStyle(color: Colors.black),
+                          )))
+                          .toList())),
+
               Padding(
                   padding: EdgeInsets.symmetric(vertical : 10),
                   child :  Column(

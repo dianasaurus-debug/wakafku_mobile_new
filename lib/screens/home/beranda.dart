@@ -3,12 +3,15 @@ import 'dart:ui';
 
 import 'package:final_project_mobile/screens/auth/login.dart';
 import 'package:final_project_mobile/screens/program/categories.dart';
+import 'package:final_project_mobile/screens/program/list.dart';
+import 'package:final_project_mobile/screens/transaction/notification.dart';
 import 'package:final_project_mobile/styles/button.dart';
 import 'package:final_project_mobile/styles/color.dart';
 import 'package:final_project_mobile/styles/font.dart';
 import 'package:final_project_mobile/utils/constants.dart';
 import 'package:final_project_mobile/utils/network.dart';
 import 'package:final_project_mobile/view_models/auth_vm.dart';
+import 'package:final_project_mobile/view_models/firebase_service.dart';
 import 'package:final_project_mobile/view_models/program_vm.dart';
 import 'package:final_project_mobile/widgets/app_bar.dart';
 import 'package:final_project_mobile/widgets/bottom_navbar.dart';
@@ -17,12 +20,17 @@ import 'package:final_project_mobile/widgets/program_tile.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 import 'package:location/location.dart';
 import 'package:location/location.dart' as LocationManager;
+
+import '../../models/program.dart';
+import '../program/detail.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -33,6 +41,8 @@ class _HomePageState extends State<HomePage> {
   late LatLng myPosition;
   late bool _serviceEnabled;
   late PermissionStatus _permissionGranted;
+  late FirebaseMessaging messaging;
+
   bool isListShown = true;
   LocationManager.Location location = new LocationManager.Location();
   double _lat = -7.317463;
@@ -80,15 +90,20 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    // FirebaseMessaging.onMessage.listen((RemoteMessage event) {
-    //   showSimpleNotification(
-    //     Text(event.notification!.title!, style: TextStyle(fontSize: 16, color: CustomColor.theme)),
-    //     subtitle: Text(event.notification!.body!, style: TextStyle(fontSize: 13, color: Colors.black)),
-    //     background: Colors.white,
-    //     duration: Duration(seconds: 20),
-    //     elevation: 2,
-    //   );
-    // });
+    messaging = FirebaseMessaging.instance;
+    FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+      showSimpleNotification(
+        Text(event.notification!.title!, style: CustomFont.blackMedBold),
+        subtitle:
+        Text(event.notification!.body!, style: CustomFont.smallTheme),
+        background: Colors.white,
+        duration: const Duration(seconds: 20),
+        elevation: 2,
+      );
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      Get.to(NotificationPage());
+    });
     viewModel();
     _locateMe();
     super.initState();
@@ -157,37 +172,67 @@ class _HomePageState extends State<HomePage> {
                             style: CustomFont.blackMedBold),
                       ])),
               Padding(
-                padding : EdgeInsets.symmetric(vertical: 10),
-                child : TextField(
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                    filled: true,
-                    fillColor: CustomColor.white1,
-                    suffixIcon: GestureDetector(
-                      onTap: (){
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: Column(
+                    children: [
+                      TypeAheadField(
+                        textFieldConfiguration: TextFieldConfiguration(
+                          autofocus: true,
+                          style: TextStyle(fontSize: 15),
+                          decoration: InputDecoration(
+                            contentPadding:
+                            EdgeInsets.fromLTRB(10, 0, 10, 0),
+                            filled: true,
+                            isDense: true,
+                            fillColor: CustomColor.white1,
+                            prefixIcon: Padding(
+                              padding:
+                              EdgeInsets.only(left: 10, right: 10),
+                              child: Icon(CupertinoIcons.search,
+                                  color: CustomColor.themedarkest),
+                            ),
+                            prefixIconConstraints: BoxConstraints(
+                              minWidth: 25,
+                              minHeight: 40,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(15),
+                              ),
+                            ),
+                            hintStyle: CustomFont.blackSmallight,
+                            hintText: ' Cari Program Wakaf',
+                          ),
+                        ),
+                        suggestionsCallback: (pattern) async {
+                          if (pattern != null && pattern.length > 0) {
+                            return await program_vm
+                                .getProgramRecommendations(pattern);
+                          } else {
+                            return [];
+                          }
+                        },
+                        itemBuilder: (context, suggestion) {
+                          var suggestion_parse = (suggestion as Map);
 
-                      },
-                      child :  Icon(Icons.filter_list_alt, color: CustomColor.theme),
-                    ),
-                    prefixIcon: Padding(
-                      padding: EdgeInsets.only(left : 10, right: 10),
-                      child: Icon(CupertinoIcons.search, color: CustomColor.themedarkest),
-                    ),
-                    prefixIconConstraints: BoxConstraints(
-                      minWidth: 25,
-                      minHeight: 20,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(15),
-                      ),
+                          return ListTile(
+                            leading: Icon(Icons.location_on),
+                            title: Text(suggestion!['title']),
+                            subtitle: Text(
+                                '${suggestion['distance'].toStringAsFixed(1)} Km'),
+                          );
+                        },
+                        onSuggestionSelected: (suggestion) {
+                          var suggestion_parse =
+                          (suggestion as Map<String, dynamic>);
 
-                    ),
-                    hintStyle: CustomFont.blackSmallight,
-                    hintText: ' Cari Program Wakaf',
-                  ),
-                ),
-              ),
+                          Program program_selected = new Program.fromJson(suggestion_parse);
+                          Route route = MaterialPageRoute(builder: (context) => ProgramDetail(program : program_selected));
+                          Navigator.push(context, route);
+                        },
+                      )
+                    ],
+                  )),
               Container(
                 height:170,
                 width: double.infinity,
@@ -229,8 +274,14 @@ class _HomePageState extends State<HomePage> {
                           children: categories.map((e) =>
                             GestureDetector(
                               onTap: (){
-                                Route route = MaterialPageRoute(builder: (context) => IndexCategory());
-                                Navigator.push(context, route);
+                                if(e.id==0){
+                                  Route route = MaterialPageRoute(builder: (context) => IndexCategory());
+                                  Navigator.push(context, route);
+                                } else {
+                                  Route route = MaterialPageRoute(builder: (context) => ListProgramByCategory(category: e));
+                                  Navigator.push(context, route);
+                                }
+
                               },
                               child : Container(
                                   margin: EdgeInsets.only(right: 5),
@@ -245,7 +296,7 @@ class _HomePageState extends State<HomePage> {
                                           width: 70,
                                           height: 60,
                                           padding: EdgeInsets.all(10),
-                                          child: Icon(FontAwesomeIcons.building)
+                                          child: Icon(e.image)
                                       ),
                                       SizedBox(height: 3),
                                       Text(e.name)

@@ -9,13 +9,14 @@ import 'package:final_project_mobile/models/transaction.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui;
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 import '../models/mode.dart';
 
-const domain_local = 'http://192.168.1.8:8000';
+const domain_local = 'https://wakafkupens.online';
 const API_URL = '${domain_local}/api';
 const IMG_PATH = '${domain_local}/img/';
 const BANK_LOGO_IMG_PATH = '${domain_local}/images/payment_logo/';
@@ -67,13 +68,38 @@ IconData detectIcon(sign){
   return namaIcon;
 
 }
+String convertToDate(dateInput){
+  DateTime date = DateTime.parse(dateInput);
+  String formattedDate = DateFormat('dd-MM-yyyy').format(date);
+  return formattedDate;
+}
+String convertToDateTime(dateInput){
+  DateTime date = DateTime.parse(dateInput);
+  String formattedDate = DateFormat('dd-MM-yyyy HH:mm').format(date);
+  return formattedDate;
+}
+String convertToTime(dateInput){
+  DateTime date = DateTime.parse(dateInput);
+  String formattedDate = DateFormat('HH:mm').format(date);
+  return formattedDate;
+}
 
 List<Category> categories = [
-  new Category('Semua', 0, 'all', 'all.png', 'test'),
-  new Category('Umum', 1, 'sosial', 'sosial.png', 'test'),
-  new Category('Edukasi', 2, 'edukasi', 'edukasi.png', 'test'),
-  new Category('Ekonomi', 3, 'ekonomi', 'ekonomi.png', 'test'),
-  new Category('Kesehatan', 4, 'kesehatan', 'kesehatan.png', 'test'),
+  new Category('Semua', 0, 'all', Icons.border_all, 'test'),
+  new Category('Umum', 1, 'sosial', Icons.people, 'test'),
+  new Category('RS/Klinik', 2, 'kesehatan', Icons.health_and_safety_rounded, 'test'),
+  new Category('Produktif', 3, 'ekonomi', Icons.monetization_on_rounded, 'test'),
+  new Category('Masjid', 4, 'ekonomi', Icons.mosque, 'test'),
+  new Category('Sekolah', 5, 'edukasi', Icons.school, 'test'),
+
+];
+List<String> amounts = [
+  '5000',
+  '10000',
+  '25000',
+  '50000',
+  '100000',
+  '200000'
 ];
 List<Mode> modes = [
   new Mode(name : 'Mobil', icon: Icons.directions_car , label: 'driving', travel_mode : TravelMode.driving),
@@ -113,11 +139,38 @@ Future<Uint8List> getBytesFromAsset(String path, int width) async {
       .buffer
       .asUint8List();
 }
-
+void launchURL(url) async {
+  await FlutterWebBrowser.openWebPage(
+      url: url,
+      customTabsOptions: CustomTabsOptions(
+          toolbarColor: Colors.lightBlue,
+          showTitle: true,
+          urlBarHidingEnabled: true));
+}
 List<PaymentInstruction> payment_instructions = [
   new PaymentInstruction(title: 'ATM Mandiri',
       desc: '1. Masukkan kartu ATM dan Pin ATM.\n2. Pilih menu Bayar/Beli.\n3. Pilih opsi Lainnya > Multipayment.\n4. Masukkan kode biller perusahaan (biasanya sudah tercantum di instruksi pembayaran).\n5. Masukkan nomor Virtual account > Benar.\n6. Masukkan angka yang diminta untuk memilih tagihan > Ya.\n7. Layar akan menampilkan konfirmasi. Jika sesuai, pilih Ya.\n8. Selesai.'),
   new PaymentInstruction(title: 'M-Banking',
       desc: '1. Buka aplikasi M-Banking.\n2. Pilih menu Bayar/Beli.\n3. Pilih opsi Lainnya > Multipayment.\n4. Masukkan kode biller perusahaan (biasanya sudah tercantum di instruksi pembayaran).\n5. Masukkan nomor Virtual account > Benar.\n6. Masukkan angka yang diminta untuk memilih tagihan > Ya.\n7. Layar akan menampilkan konfirmasi. Jika sesuai, pilih Ya.\n8. Selesai.'),
 ];
+const List<String> PAYMENT_STATUS = [
+  'Menunggu pembayaran',
+  'Pembayaran berhasil',
+  'Dana diproses',
+  'Selesai',
+  'Pembayaran Kadaluarsa'
+];
+const List<Color> PAYMENT_STATUS_COLOR = [
+  Colors.grey,
+  Colors.green,
+  Colors.orange,
+  Colors.blue,
+  Colors.red,
+];
+const List<String> KMEANS_STATUS = [
+  'Direkomendasikan',
+  'Cukup direkomendasikan',
+  'Sangat direkomendasikan',
+];
+
 String textSample='Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book ';

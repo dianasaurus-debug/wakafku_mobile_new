@@ -19,7 +19,7 @@ class PaymentMethod {
       : name = json['name'],
         label = json['label'],
         kind = json['kind'],
-        id = json['id'],
+        id = json['id'].runtimeType == String ? int.parse(json['id']) : json['id'],
         logo = json['logo'];
 
   Map<String, dynamic> toJson() => {

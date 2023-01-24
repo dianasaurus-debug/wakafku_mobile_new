@@ -52,14 +52,17 @@ class ProgramTile extends StatelessWidget {
                             height: 5,
                           ),
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                               children : [
                                 Icon(FontAwesomeIcons.locationPin,
                                     color:CustomColor.theme, size: 20),
                                 SizedBox(width : 5),
-                                Text(
-                                  program.address_detail,
-                                  style: CustomFont.blackSmallight,
-                                ),
+                                Expanded(
+                                  child : Text(
+                                    program.address_detail,
+                                    style: CustomFont.blackTinyLight,
+                                  ),
+                                )
                               ]
                           ),
                           Row(
